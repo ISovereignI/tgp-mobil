@@ -24,15 +24,17 @@ fi
 TEMP_FILE=$(mktemp)
 
 echo "Downloading $URL"
-curl -s -L "$URL" \
+HTTP_CODE=$(curl -s -L "$URL" \
   -H "User-Agent: $USER_AGENT" \
   -H "Accept: $ACCEPT" \
   -H "Accept-Language: $ACCEPT_LANGUAGE" \
-  -o "$TEMP_FILE" || {
+  -o "$TEMP_FILE" -w '%{http_code}') || {
   echo "Error: Failed to download $URL"
   rm -f "$TEMP_FILE"
   exit 1
 }
+echo "HTTP status: $HTTP_CODE, size: $(wc -c < "$TEMP_FILE") bytes"
+cp "$TEMP_FILE" last_download.html
 
 MIME_TYPE=$(file --mime-type -b "$TEMP_FILE")
 FILENAME=$(echo "$URL" | sed -E 's|^https?://||' | sed -E 's|^www\.||' | sed 's|/$||' | sed 's|/|-|g')
