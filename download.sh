@@ -24,16 +24,12 @@ fi
 TEMP_FILE=$(mktemp)
 
 echo "Downloading $URL"
-HTTP_CODE=$(curl -s -L "$URL" \
-  -H "User-Agent: $USER_AGENT" \
-  -H "Accept: $ACCEPT" \
-  -H "Accept-Language: $ACCEPT_LANGUAGE" \
-  -o "$TEMP_FILE" -w '%{http_code}') || {
+shot-scraper html "$URL" -o "$TEMP_FILE" --wait 5000 --user-agent "$USER_AGENT" || {
   echo "Error: Failed to download $URL"
   rm -f "$TEMP_FILE"
   exit 1
 }
-echo "HTTP status: $HTTP_CODE, size: $(wc -c < "$TEMP_FILE") bytes"
+echo "Downloaded size: $(wc -c < "$TEMP_FILE") bytes"
 cp "$TEMP_FILE" last_download.html
 
 MIME_TYPE=$(file --mime-type -b "$TEMP_FILE")
